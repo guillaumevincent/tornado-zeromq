@@ -1,11 +1,13 @@
 import zmq
 
+import json
+
 context = zmq.Context()
 receiver = context.socket(zmq.PULL)
-receiver.connect("tcp://127.0.0.1:5557")
+receiver.connect("tcp://127.0.0.1:4444")
 
 publisher = context.socket(zmq.PUB)
-publisher.bind("tcp://127.0.0.1:5556")
+publisher.bind("tcp://127.0.0.1:5555")
 
 poller = zmq.Poller()
 poller.register(receiver, zmq.POLLIN)
@@ -20,5 +22,4 @@ while True:
     if receiver in socks:
         message = receiver.recv_json()
         print(message)
-        publication = '%s' %message['name']
-        publisher.send(publication.encode('utf-8'))
+        publisher.send_multipart([message['event'].encode('utf-8'), json.dumps(message).encode('utf-8')])
