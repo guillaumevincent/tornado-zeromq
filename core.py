@@ -1,10 +1,9 @@
 import zmq
-
 import json
 
 context = zmq.Context()
-receiver = context.socket(zmq.PULL)
-receiver.connect("tcp://127.0.0.1:4444")
+receiver = context.socket(zmq.ROUTER)
+receiver.bind("tcp://127.0.0.1:4444")
 
 publisher = context.socket(zmq.PUB)
 publisher.bind("tcp://127.0.0.1:5555")
@@ -20,6 +19,11 @@ while True:
         break
 
     if receiver in socks:
-        message = receiver.recv_json()
+        identity, data = receiver.recv_multipart()
+        message = json.loads(data.decode('utf-8'))
         print(message)
-        publisher.send_multipart([message['event'].encode('utf-8'), json.dumps(message).encode('utf-8')])
+        publisher.send_multipart([message['event'].encode('utf-8'), data])
+
+receiver.close()
+publisher.close()
+context.term()
