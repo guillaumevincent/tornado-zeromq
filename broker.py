@@ -26,7 +26,7 @@ while True:
         event, message = frontend.recv_multipart()
         print('Event %s from %s' % (message.decode('utf-8'), event.decode('utf-8')))
         data = '%s (id: %d)' % (message.decode('utf-8'), id)
-        backend.send_multipart([message,str(id).encode('utf-8')])
+        backend.send_multipart([message, str(id).encode('utf-8')])
 
 frontend.close()
 backend.close()
